@@ -8,5 +8,33 @@ This assignment shows how we can extend ordinary least squares regression, which
 def f_true(x):
   y = 6.0 * (np.sin(x + 2) + np.sin(2*x + 4))
   return y
+  import matplotlib.pyplot as plt          # For all our plotting needs
+plt.figure()
+
+# Plot the data
+plt.scatter(X, y, 12, marker='o')
+
+# Plot the true function, which is really "unknown"
+x_true = np.arange(-7.5, 7.5, 0.05)
+y_true = f_true(x_true)
+plt.plot(x_true, y_true, marker='None', color='r')
 
 ```
+
+```py
+import matplotlib.pyplot as plt          # For all our plotting needs
+plt.figure()
+
+# Plot the data
+plt.scatter(X, y, 12, marker='o')
+
+# Plot the true function, which is really "unknown"
+x_true = np.arange(-7.5, 7.5, 0.05)
+y_true = f_true(x_true)
+plt.plot(x_true, y_true, marker='None', color='r')
+ ```
+
+ ```
+
+ 
+  ```
