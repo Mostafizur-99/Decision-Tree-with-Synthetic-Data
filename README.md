@@ -33,7 +33,7 @@ x_true = np.arange(-7.5, 7.5, 0.05)
 y_true = f_true(x_true)
 plt.plot(x_true, y_true, marker='None', color='r')
  ```
-<img width="697" height="507" alt="Image" src="https://github.com/user-attachments/assets/bf6884a4-8bc6-4ed4-a754-b1c42d757a17" />
+
 
 
 
