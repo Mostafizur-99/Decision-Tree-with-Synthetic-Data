@@ -33,7 +33,7 @@ x_true = np.arange(-7.5, 7.5, 0.05)
 y_true = f_true(x_true)
 plt.plot(x_true, y_true, marker='None', color='r')
  ```
-![Alt text](C:\Users\hp\OneDrive\Pictures\Screenshots 1)
+![Nothing](C:\Users\hp\OneDrive\Pictures\Screenshots 1)
 
 
 
