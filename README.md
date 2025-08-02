@@ -197,4 +197,76 @@ n_samples = 300    # Total size of data set
 
 ```
 
-<img width="300" height="250" alt="Image" src="https://github.com/user-attachments/assets/993ba373-4b0a-45cc-99f3-4db8e0326255" />
+<img width="500" height="400" alt="Image" src="https://github.com/user-attachments/assets/993ba373-4b0a-45cc-99f3-4db8e0326255" />
+
+ **The effect of the regularization parameter,C**
+
+ Complete the Python code snippet below that takes the generated synthetic 2-d data as input and learns non-linear SVMs. Use scikit-learn's SVC function to learn SVM models with radial-basis kernels for fixed  γ  and various choices of  C∈{10−3,10−2⋯,1,⋯105} . The value of  γ  is fixed to  γ=1d⋅σX , where  d  is the data dimension and  σX  is the standard deviation of the data set  X . SVC can automatically use these setting for  γ  if you pass the argument gamma = 'scale' (see documentation for more details).
+
+Plot: For each classifier, compute both the training error and the validation error. Plot them together, making sure to label the axes and each curve clearly.
+
+Discussion: How do the training error and the validation error change with  C ? Based on the visualization of the models and their resulting classifiers, how does changing  C  change the models? Explain in terms of minimizing the SVM's objective function  12w′w+CΣni=1ℓ(w∣xi,yi) , where  ℓ  is the hinge loss for each training example  (xi,yi) .
+
+Final Model Selection: Use the validation set to select the best the classifier corresponding to the best value,  Cbest . Report the accuracy on the test set for this selected best SVM model. Note: You should report a single number, your final test set accuracy on the model corresponding to  Cbest .
+
+```py
+# Learn support vector classifiers with a radial-basis function kernel with
+# fixed gamma = 1 / (n_features * X.std()) and different values of C
+from sklearn import svm
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+
+# ***Your Code Starts Here***
+
+# Use np.arange to select a range from -3.0 to 6.0 with steps of 1.0
+C_range = np.arange(-3, 6, 1)
+# Use np.power to select C_values as 10.0 ^ C_range
+C_values = np.power(10.0, C_range)
+
+# ***Your Code Ends Here***
+
+models = dict()
+trnErr = dict()
+valErr = dict()
+gamma1=dict()
+
+
+# ***Your Code Starts Here***
+
+# Run the loop for all C_values
+for C in C_values:
+    #Crete a non-linear SVM classifier
+    clf= SVC(kernel='rbf', gamma='scale', C= C)
+    #Train Classifier
+    models[C]= clf.fit(X_trn, y_trn)
+    trnErr[C]= 1 - clf.score(X_trn, y_trn)
+    valErr[C]= 1 - clf.score(X_val, y_val)
+
+# ***Your Code Ends Here***
+
+
+#visualise on training and validation data data
+visualize(models, 'C', X_trn, y_trn)
+# Plot all the models
+plt.figure()
+plt.semilogx(trnErr.keys(), trnErr.values(), marker='o', linewidth=3, markersize=12)
+plt.semilogx(valErr.keys(), valErr.values(), marker='s', linewidth=3, markersize=12)
+plt.xlabel('C', fontsize=16)
+plt.ylabel('Validation/Training error', fontsize=16)
+plt.xticks(list(trnErr.keys()), fontsize=12)
+plt.legend(['Training Error', 'Validation Error'], fontsize=16)
+
+plt.axis([10**-3, 10**5, 0, 1])
+
+# Find Best C and find the accuracy
+C_best, Min_Error = min(valErr.items(), key=lambda x: x[1])
+print('The best value of C is ', C_best)
+clf=SVC(C = C_best, gamma='scale')
+models=clf.fit(X_trn, y_trn)
+Accuracy = (clf.score(X_tst, y_tst, sample_weight=None))
+print('The accuracy of the model is ', Accuracy)
+
+```
+
+<img width="500" height="300" alt="Image" src="https://github.com/user-attachments/assets/1fe71b3a-380b-4267-86fe-5c35979ad0cc" />
