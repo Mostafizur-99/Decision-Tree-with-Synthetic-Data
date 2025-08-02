@@ -44,3 +44,62 @@ Recall that we want to build a model to generalize well on future data, and in o
 -Test set:  Dtst  consists of test examples to estimate how the model will perform on future data.
 
 <img width="833" height="195" alt="Image" src="https://github.com/user-attachments/assets/3d89d87c-830e-49cc-97cc-fc68359b0fe6" />
+
+```py
+# scikit-learn has many tools and utilities for model selection
+from sklearn.model_selection import train_test_split
+tst_frac = 0.3  # Fraction of examples to sample for the test set
+val_frac = 0.1  # Fraction of examples to sample for the validation set
+
+# First, we use train_test_split to partition (X, y) into training and test sets
+X_trn, X_tst, y_trn, y_tst = train_test_split(X, y, test_size=tst_frac, random_state=42)
+
+# Next, we use train_test_split to further partition (X_trn, y_trn) into training and validation sets
+X_trn, X_val, y_trn, y_val = train_test_split(X_trn, y_trn, test_size=val_frac, random_state=42)
+
+# Plot the three subsets
+plt.figure()
+plt.scatter(X_trn, y_trn, 12, marker='o', color='orange')
+plt.scatter(X_val, y_val, 12, marker='o', color='green')
+plt.scatter(X_tst, y_tst, 12, marker='o', color='blue')
+```
+
+<img width="715" height="538" alt="Image" src="https://github.com/user-attachments/assets/4b67ec9d-b11c-4810-afd5-0e37c471bafa" />
+
+# Regression with Polynomial Basis Function
+
+This problem extends ordinary least squares regression, which uses the hypothesis class of linear regression functions, to non-linear regression functions modeled using polynomial basis functions. In order to learn nonlinear models using linear regression, we have to explicitly transform the data into a higher-dimensional space. The nonlinear hypothesis class we will consider is the set of  d -degree polynomials of the form  f(x)=w0+w1x+w2x2+...+wdxd  or a linear combination of polynomial basis function:
+
+```py
+# X float(n, ): univariate data
+# d int: degree of polynomial
+def polynomial_transform(X, d):
+  #
+  #
+  # *** Insert your code here ***
+  #convert the array into numpy
+  
+    #X = np.asarray(X)
+
+  # Create the Vandermonde matrix for the input data up to degree d
+    V = np.zeros((len(X), d + 1))
+    
+    # Loop over each degree and fill in the columns with powers of X
+    for i in range(len(X)):
+        for j in range(d+1):
+            V[i,j]=np.power(i,j)
+    return V
+```
+
+```py
+# Check your Polynomial Function
+
+Phi_trn = polynomial_transform(X_trn, 3)
+Phi_val = polynomial_transform(X_val, 3)
+
+# Plot the three subsets
+plt.figure()
+plt.scatter(X_trn, y_trn, 12, marker='o', color='yellow')
+plt.scatter(X_val, y_val, 12, marker='o', color='green')
+```
+<img width="722" height="505" alt="Image" src="https://github.com/user-attachments/assets/cb7a8197-d397-4deb-b12a-942e67e3804a" />
