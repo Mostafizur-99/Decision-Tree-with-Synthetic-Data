@@ -38,6 +38,7 @@ plt.plot(x_true, y_true, marker='None', color='r')
  
 Recall that we want to build a model to generalize well on future data, and in order to generalize well on future data, we need to pick a model that trade-off well between fit and complexity (that is, bias and variance). We randomly split the overall data set ( D ) into three subsets:
 
--Training set:  Dtrn  consists of the actual training examples that will be used to train the model
--Validation set:  Dval  consists of validation examples that will be used to tune model hyperparameters (such as  λ>0  in ridge regression) in order to find the best trade-off between fit and complexity (that is, the value of  λ  that produces the best model);
+- Training set:  Dtrn  consists of the actual training examples that will be used to train the model
+
+- Validation set:  Dval  consists of validation examples that will be used to tune model hyperparameters (such as  λ>0  in ridge regression) in order to find the best trade-off between fit and complexity (that is, the value of  λ  that produces the best model);
 -Test set:  Dtst  consists of test examples to estimate how the model will perform on future data.
