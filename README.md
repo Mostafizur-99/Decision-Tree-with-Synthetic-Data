@@ -270,3 +270,237 @@ print('The accuracy of the model is ', Accuracy)
 ```
 
 <img width="500" height="300" alt="Image" src="https://github.com/user-attachments/assets/1fe71b3a-380b-4267-86fe-5c35979ad0cc" />
+
+## Breast Cancer Diagnosis with Support Vector Machines
+
+ we will use the [Wisconsin Breast Cancer](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic) data set, which has already been pre-processed and partitioned into training, validation and test sets. Numpy's loadtxt command can be used to load CSV files.
+
+## Breast Cancer Diagnosis with  k -Nearest Neighbors
+
+ ```py
+ # Load the Breast Cancer Diagnosis data set; download the files from eLearning
+# CSV files can be read easily using np.loadtxt()
+
+file_trn = '/content/wdbc_trn.csv'
+file_val = '/content/wdbc_tst.csv'
+file_tst = '/content/wdbc_val.csv'
+
+X_trn=np.loadtxt(file_trn, usecols=np.arange(1, 31), delimiter = ",")
+y_trn=np.loadtxt(file_trn, usecols=0, delimiter = ",")
+
+
+X_val=np.loadtxt(file_val, usecols=np.arange(1, 31), delimiter = ",")
+y_val=np.loadtxt(file_val, usecols=0, delimiter = ",")
+
+
+X_tst=np.loadtxt(file_tst, usecols=np.arange(1, 31), delimiter = ",")
+y_tst=np.loadtxt(file_tst, usecols=0, delimiter = ",")
+
+```
+
+```py
+from sklearn.neighbors import KNeighborsClassifier
+models = dict()
+trnErr = dict()
+valErr = dict()
+
+# ***Your Code Starts Here***
+
+k_values = np.arange(1,21, 3)
+
+for k in k_values:
+    neigh = KNeighborsClassifier(n_neighbors=k)
+    neigh.fit(X_trn, y_trn)
+
+    y_pred_train = neigh.predict(X_trn)
+    y_pred_val = neigh.predict(X_val)
+    models[k] =  neigh
+    trnErr[k] = accuracy_score(y_trn, y_pred_train)
+    valErr[k] = accuracy_score(y_val, y_pred_val)
+
+
+# ***Your Code Ends Here***
+# Plot all the models
+plt.figure()
+plt.plot(trnErr.keys(), trnErr.values(), marker='o', linewidth=3, markersize=12)
+plt.plot(valErr.keys(), valErr.values(), marker='s', linewidth=3, markersize=12)
+plt.xlabel('k', fontsize=16)
+plt.ylabel('Validation/Training error', fontsize=16)
+plt.xticks(list(trnErr.keys()), fontsize=12)
+plt.legend(['Training Error', 'Validation Error'], fontsize=16)
+
+
+# ***Your Code Starts Here***
+
+# Find Best gamma and find the accuracy
+k_best, Min_Error = min(valErr.items(), key=lambda x: x[1])
+
+# ***Your Code Ends Here***
+
+print('The best value of K is ', k_best)
+neigh = KNeighborsClassifier(n_neighbors=k_best)
+models=neigh.fit(X_trn, y_trn)
+Accuracy = (neigh.score(X_tst, y_tst, sample_weight=None))
+print('The accuracy of the model is ', Accuracy)
+
+```
+
+<img width="747" height="533" alt="Image" src="https://github.com/user-attachments/assets/61c26607-d2ed-4c45-90b5-e36daef1141f" />
+
+### Decision Trees with Synthetic Data
+
+we will generate synthetic data for a nonlinear binary classification problem and partition it into training, validation and test sets. Our goal is to understand the generalization behavior of decision trees of increasing complexity, characterized by their depth,  d .
+
+```py
+   #
+# DO NOT EDIT THIS FUNCTION; IF YOU WANT TO PLAY AROUND WITH DATA GENERATION,
+# MAKE A COPY OF THIS FUNCTION AND THEN EDIT
+#
+import numpy as np
+from sklearn.datasets import make_circles
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+def generate_data(n_samples, tst_frac=0.2, val_frac=0.2):
+    # Generate a non-linear data set
+    X, y = make_circles(n_samples=n_samples, noise=0.25, random_state=42, factor=0.3)
+
+    # Take a small subset of the data and make it VERY noisy; that is, generate outliers
+    m = 30
+    np.random.seed(30)  # Deliberately use a different seed
+    ind = np.random.permutation(n_samples)[:m]
+    X[ind, :] += np.random.multivariate_normal([0, 0], 0.25*np.eye(2), (m, ))
+    y[ind] = 1 - y[ind]
+
+    # Plot this data
+    cmap = ListedColormap(['#b30065', '#178000'])
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolors='k')
+
+    # First, we use train_test_split to partition (X, y) into training and test sets
+    X_trn, X_tst, y_trn, y_tst = train_test_split(X, y, test_size=tst_frac, random_state=42)
+
+    # Next, we use train_test_split to further partition (X_trn, y_trn) into training and validation sets
+    X_trn, X_val, y_trn, y_val = train_test_split(X_trn, y_trn, test_size=val_frac, random_state=42)
+
+    return (X_trn, y_trn), (X_val, y_val), (X_tst, y_tst)
+
+```
+```py
+#
+#  DO NOT EDIT THIS FUNCTION; IF YOU WANT TO PLAY AROUND WITH VISUALIZATION,
+#  MAKE A COPY OF THIS FUNCTION AND THEN EDIT
+#
+def visualize(models, X, y):
+    # Initialize plotting
+    if len(models) % 3 == 0:
+        nrows = len(models) // 3
+    else:
+        nrows = len(models) // 3 + 1
+
+    fig, axes = plt.subplots(nrows=nrows, ncols=3, figsize=(15, 5.0 * nrows))
+    cmap = ListedColormap(['#b30065', '#178000'])
+
+    # Create a mesh
+    xMin, xMax = X[:, 0].min() - 1, X[:, 0].max() + 1
+    yMin, yMax = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xMesh, yMesh = np.meshgrid(np.arange(xMin, xMax, 0.01),
+                               np.arange(yMin, yMax, 0.01))
+
+    for i, (p, clf) in enumerate(models.items()):
+        r, c = np.divmod(i, 3)
+        if nrows == 1:
+            ax = axes[c]
+        else:
+            ax = axes[r, c]
+
+        # Plot contours
+        zMesh = clf.predict(np.c_[xMesh.ravel(), yMesh.ravel()])
+        zMesh = zMesh.reshape(xMesh.shape)
+        ax.contourf(xMesh, yMesh, zMesh, cmap=plt.cm.PiYG, alpha=0.6)
+
+        # Plot data
+        ax.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolors='k')
+        ax.set_title('Tree Depth = {0}'.format(p))
+```
+
+<img width="720" height="510" alt="Image" src="https://github.com/user-attachments/assets/f3e960f6-ced8-40e6-9053-f9eeffbf07c5" />
+
+## a. Model Selection and Visualization
+
+Complete the Python code snippet below that takes the generated synthetic 2-d data as input and learns decision trees. Use scikit-learn's DecisionTreeClassifier function to learn decision trees of different depths,  d∈{1,⋯,9} .
+
+Plot: For each classifier, compute both the training error and the validation error. Plot them together, making sure to label the axes and each curve clearly. Visualize the decision trees of different depths using the provided function.
+
+Final Model Selection: Use the validation set to select the best the classifier corresponding to the best value,  dbest . Report the accuracy on the test set for this selected best decision tree model. Note: You should report a single number, your final test set accuracy on the model corresponding to  dbest .
+
+```py
+# Learn decision trees with different depths
+from sklearn.tree import DecisionTreeClassifier
+
+d_values = np.arange(1, 10, dtype='int')
+models = dict()
+trnErr = dict()
+valErr = dict()
+
+for d in d_values:
+    #
+    # INSERT YOUR CODE HERE
+    model = DecisionTreeClassifier(criterion = 'entropy', max_depth = d)
+    models[d] = model
+    model.fit(X_trn, y_trn)
+    #y_pred = model.predict(X_trn)
+    trnErr[d] = model.score(X_trn,y_trn)
+    #y_val_pred =
+    valErr[d] = model.score(X_val,y_val)
+    #
+    print('Learning a decision tree with d = {0}.'.format(d))
+
+visualize(models, X_trn, y_trn)
+```
+<img width="797" height="533" alt="Image" src="https://github.com/user-attachments/assets/70bda75c-8d89-4c6a-8c43-6c87304eda0c" />
+
+```py
+plt.figure(figsize=(10, 6))
+plt.plot(d_values, list(trnErr.values()), label='Training Accuracy', marker='o')
+plt.plot(d_values, list(valErr.values()), label='Validation Accuracy', marker='o')
+plt.xlabel('Depth of the Tree')
+plt.ylabel('Accuracy')
+plt.title('Accuracy vs. Depth of the Decision Tree')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+<img width="780" height="515" alt="Image" src="https://github.com/user-attachments/assets/146d03d4-ea78-4c5a-97ce-d7583728fcfa" />
+
+## Model selection
+
+**Cross validation:** Here, instead of a single validation set, we will use a  10 -fold cross validation procedure to improve robustness of model selection. Use scikit-learn's DecisionTreeClassifier function to perform model selection with decision trees of different depths,  d=3,⋯,15}  via  10 -fold cross validation. Make sure you are using entropy as the split criterion.
+
+## Model Visualization
+
+```py
+#
+# After you install GraphViz, EDIT THE CODE BELOW TO set the path to the
+# executable 'dot.exe' below (shown for Windows). On MacOs, you can find GraphViz
+# in the /Applications/ folder.
+#
+import os
+os.environ["PATH"] += os.pathsep + 'C:\\Users\\ete\\Desktop\\windows_10_cmake_Release_Graphviz-12.1.1-win32'
+
+#
+# DO NOT EDIT CODE BELOW
+#
+from sklearn.tree import export_graphviz
+from subprocess import call
+from IPython.display import Image
+
+export_graphviz(models[d], out_file='tree.dot', feature_names=feature_names,
+                class_names = ['loss', 'win'],
+                rounded=True, proportion=False, precision=2, filled=True)
+call(['dot', '-Tpng', 'tree.dot', '-o', 'tree.png', '-Gdpi=150'])
+Image(filename='tree.png')
+```
+
+<img width="852" height="227" alt="Image" src="https://github.com/user-attachments/assets/45e43192-e404-42fc-a9c2-9f01bf6e2a7d" />
