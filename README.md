@@ -102,4 +102,99 @@ plt.figure()
 plt.scatter(X_trn, y_trn, 12, marker='o', color='yellow')
 plt.scatter(X_val, y_val, 12, marker='o', color='green')
 ```
-<img width="722" height="505" alt="Image" src="https://github.com/user-attachments/assets/cb7a8197-d397-4deb-b12a-942e67e3804a" />
+<img width="300" height="250" alt="Image" src="https://github.com/user-attachments/assets/cb7a8197-d397-4deb-b12a-942e67e3804a" />
+
+## Support Vector Machine
+
+we will generate synthetic data for a nonlinear binary classification problem and partition it into training, validation and test sets. Our goal is to understand the behavior of SVMs with Radial-Basis Function (RBF) kernels with different values of  C  and  γ .
+
+
+```py
+#
+# DO NOT EDIT THIS FUNCTION; IF YOU WANT TO PLAY AROUND WITH DATA GENERATION,
+# MAKE A COPY OF THIS FUNCTION AND THEN EDIT
+#
+import numpy as np
+from sklearn.datasets import make_moons
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+def generate_data(n_samples, tst_frac=0.2, val_frac=0.2):
+  # Generate a non-linear data set
+  X, y = make_moons(n_samples=n_samples, noise=0.25, random_state=42)
+
+  # Take a small subset of the data and make it VERY noisy; that is, generate outliers
+  m = 30
+  np.random.seed(42)
+  ind = np.random.permutation(n_samples)[:m]
+  X[ind, :] += np.random.multivariate_normal([0, 0], np.eye(2), (m, ))
+  y[ind] = 1 - y[ind]
+
+  # Plot this data
+  cmap = ListedColormap(['#b30065', '#178000'])
+  plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolors='k')
+
+  # First, we use train_test_split to partition (X, y) into training and test sets
+  X_trn, X_tst, y_trn, y_tst = train_test_split(X, y, test_size=tst_frac,
+                                                random_state=42)
+
+  # Next, we use train_test_split to further partition (X_trn, y_trn) into training and validation sets
+  X_trn, X_val, y_trn, y_val = train_test_split(X_trn, y_trn, test_size=val_frac,
+                                                random_state=42)
+
+  return (X_trn, y_trn), (X_val, y_val), (X_tst, y_tst)
+
+```
+
+```py
+#
+#  DO NOT EDIT THIS FUNCTION; IF YOU WANT TO PLAY AROUND WITH VISUALIZATION,
+#  MAKE A COPY OF THIS FUNCTION AND THEN EDIT
+#
+
+def visualize(models, param, X, y):
+  # Initialize plotting
+  if len(models) % 3 == 0:
+    nrows = len(models) // 3
+  else:
+    nrows = len(models) // 3 + 1
+
+  fig, axes = plt.subplots(nrows=nrows, ncols=3, figsize=(15, 5.0 * nrows))
+  cmap = ListedColormap(['#b30065', '#178000'])
+
+  # Create a mesh
+  xMin, xMax = X[:, 0].min() - 1, X[:, 0].max() + 1
+  yMin, yMax = X[:, 1].min() - 1, X[:, 1].max() + 1
+  xMesh, yMesh = np.meshgrid(np.arange(xMin, xMax, 0.01),
+                             np.arange(yMin, yMax, 0.01))
+
+  for i, (p, clf) in enumerate(models.items()):
+    # if i > 0:
+    #   break
+    r, c = np.divmod(i, 3)
+    ax = axes[r, c]
+
+    # Plot contours
+    zMesh = clf.decision_function(np.c_[xMesh.ravel(), yMesh.ravel()])
+    zMesh = zMesh.reshape(xMesh.shape)
+    ax.contourf(xMesh, yMesh, zMesh, cmap=plt.cm.PiYG, alpha=0.6)
+
+    if (param == 'C' and p > 0.0) or (param == 'gamma'):
+      ax.contour(xMesh, yMesh, zMesh, colors='k', levels=[-1, 0, 1],
+                 alpha=0.5, linestyles=['--', '-', '--'])
+
+    # Plot data
+    ax.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap, edgecolors='k')
+    ax.set_title('{0} = {1}'.format(param, p))
+```
+
+```py
+# Generate the data
+n_samples = 300    # Total size of data set
+(X_trn, y_trn), (X_val, y_val), (X_tst, y_tst) = generate_data(n_samples)
+
+
+```
+
+<img width="300" height="250" alt="Image" src="https://github.com/user-attachments/assets/993ba373-4b0a-45cc-99f3-4db8e0326255" />
